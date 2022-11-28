@@ -1,5 +1,5 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import { Server, Socket } from "socket.io";
+import { NextApiRequest } from "next";
+import { Server } from "socket.io";
 
 export default function SocketHandler(req: NextApiRequest, res: any) {
   if (res.socket.server.io) {
@@ -17,7 +17,7 @@ export default function SocketHandler(req: NextApiRequest, res: any) {
       socket.join(obj.roomId);
 
       const count = io.sockets.adapter.rooms.get(obj.roomId)?.size!;
-      console.log({ count });
+      console.log({ count, id: socket.id });
 
       const newObject = {
         ...obj,
@@ -31,8 +31,6 @@ export default function SocketHandler(req: NextApiRequest, res: any) {
       if (count <= 2) {
         io.in(obj.roomId).emit("waiting_lobby", newObject);
       }
-
-      // socket.broadcast.emit("newIncomingMessage", obj);
     });
 
     socket.on("send_message_xo", (obj) => {
@@ -43,6 +41,16 @@ export default function SocketHandler(req: NextApiRequest, res: any) {
     socket.on("winner_xo", (obj) => {
       console.log({ obj });
       io.in(obj.roomId).emit("announce_winner", obj);
+    });
+
+    socket.on("leave_room", (obj) => {
+      console.log({ leave: obj });
+      const count = io.sockets.adapter.rooms.get(obj.roomId)?.size!;
+      if (count === 2) {
+        io.socketsLeave(obj.roomId);
+      } else {
+        socket.leave(obj.roomId);
+      }
     });
   });
 

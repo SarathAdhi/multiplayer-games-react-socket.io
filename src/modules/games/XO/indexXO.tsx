@@ -3,8 +3,6 @@ import io from "socket.io-client";
 import { Tooltip, Button } from "@chakra-ui/react";
 import { useToast, Box } from "@chakra-ui/react";
 
-let socket: any;
-
 const boardTile = ["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((e) => ({
   tile: e,
   username: "",
@@ -27,6 +25,8 @@ enum gameStatusEnum {
   WAIT = "WAIT",
   LIVE = "LIVE",
 }
+
+let socket: any;
 
 export const XOGameBoard: React.FC<Props> = ({ roomId, username }) => {
   const [boardTileInfo, setBoardTileInfo] =
@@ -96,28 +96,6 @@ export const XOGameBoard: React.FC<Props> = ({ roomId, username }) => {
           </Box>
         ),
       });
-
-      // if (gameStatus === gameStatusEnum.LIVE) return;
-
-      // if (winnerData.username == username) {
-      //   toast({
-      //     title: "Congratulations!",
-      //     description: "You won the game!",
-      //     status: "success",
-      //     duration: 3000,
-      //     isClosable: true,
-      //   });
-
-      //   return;
-      // }
-
-      // toast({
-      //   title: "Oops!",
-      //   description: "You lost the game!",
-      //   status: "error",
-      //   duration: 3000,
-      //   isClosable: true,
-      // });
     });
   };
 
@@ -260,7 +238,27 @@ export const XOGameBoard: React.FC<Props> = ({ roomId, username }) => {
           <h1 className="text-2xl font-semibold">
             Player {winnerDetails.playerSymbol} won
           </h1>
+
           <p>username: {winnerDetails.username}</p>
+
+          <Button
+            mt={5}
+            onClick={async () => {
+              socket.emit("leave_room", {
+                roomId,
+              });
+
+              setPlayerSymbol("");
+              setIsMyTurn(false);
+              setGameStatus(gameStatusEnum.WAIT);
+              setWinnerDetails(undefined);
+              setBoardTileInfo(boardTile);
+
+              socketInitializer();
+            }}
+          >
+            Reset
+          </Button>
         </div>
       )}
     </div>
