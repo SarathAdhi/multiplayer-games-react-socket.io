@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import io from "socket.io-client";
-import { Tooltip, Button } from "@chakra-ui/react";
-import { useToast, Box } from "@chakra-ui/react";
+import { Tooltip, Button, useToast } from "@chakra-ui/react";
 
 const boardTile = ["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((e) => ({
   tile: e,
@@ -42,35 +41,71 @@ export const XOGameBoard: React.FC<Props> = ({ roomId, username }) => {
   const toast = useToast();
 
   useEffect(() => {
-    socketInitializer();
+    socketInitializer({ _winnerDetails: null, currentPlayers: [] });
+
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
-  const socketInitializer = async () => {
+  function resetTheGame(
+    _winnerDetails: BoardTileInfoProps,
+    currentPlayers: string[]
+  ) {
+    socket.emit("leave_room", {
+      roomId,
+      boardTile,
+    });
+
+    socketInitializer({ _winnerDetails, currentPlayers });
+  }
+
+  const socketInitializer = async ({
+    _winnerDetails,
+    currentPlayers,
+  }: {
+    _winnerDetails: BoardTileInfoProps | null;
+    currentPlayers: string[];
+  }) => {
+    setWinnerDetails(undefined);
+
     await fetch("/api/xo");
 
     socket = io();
 
-    socket.emit("join_xo_room", { username, roomId });
-
-    socket.on("start_xo", (data: { count: number } & BoardTileInfoProps) => {
-      setPlayerSymbol(data.playerSymbol);
-      setIsMyTurn(data.playerSymbol === "X" ? true : false);
-
-      setGameStatus(
-        data.count > 2
-          ? gameStatusEnum.LIVE
-          : data.count === 2
-          ? gameStatusEnum.START
-          : gameStatusEnum.WAIT
-      );
+    socket.emit("join_xo_room", {
+      username,
+      roomId,
+      preWinner: _winnerDetails?.username,
+      isGameReset: !!_winnerDetails?.username,
+      currentPlayers,
     });
+
+    socket.on(
+      "start_xo",
+      (
+        data: { count: number; gameStatus: gameStatusEnum } & BoardTileInfoProps
+      ) => {
+        setPlayerSymbol(data.playerSymbol);
+        setIsMyTurn(data.playerSymbol === "X" ? true : false);
+
+        setGameStatus(data.gameStatus);
+
+        // console.log({ status: data.gameStatus });
+      }
+    );
 
     socket.on(
       "waiting_lobby",
       (data: { gameStatus: gameStatusEnum } & BoardTileInfoProps) => {
+        console.log({ status: data.gameStatus });
         setGameStatus(data.gameStatus);
       }
     );
+
+    socket.on("reset_tile", (data: { boardTile: BoardTileInfoProps[] }) => {
+      setBoardTileInfo(data.boardTile);
+    });
 
     socket.on("receive_message_xo", (data: BoardTileInfoProps) => {
       setIsMyTurn(data.username === username ? false : true);
@@ -83,20 +118,23 @@ export const XOGameBoard: React.FC<Props> = ({ roomId, username }) => {
       );
     });
 
-    socket.on("announce_winner", (winnerData: any) => {
-      console.log({ winnerData });
-      setWinnerDetails(winnerData);
+    socket.on(
+      "announce_winner",
+      (data: { currentPlayers: string[]; result: BoardTileInfoProps }) => {
+        setWinnerDetails(data.result);
 
-      toast({
-        position: "bottom",
-        variant: "top-accent",
-        render: () => (
-          <Box color="white" px={5} py={3} bg="blue.500" borderRadius={"md"}>
-            {`Player ${winnerData.playerSymbol} won!`}
-          </Box>
-        ),
-      });
-    });
+        toast.closeAll();
+
+        toast({
+          title: "Refreshing in 3 seconds",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+
+        setTimeout(() => resetTheGame(data.result, data.currentPlayers), 3000);
+      }
+    );
   };
 
   function handleTileTouch(tile: string) {
@@ -111,8 +149,6 @@ export const XOGameBoard: React.FC<Props> = ({ roomId, username }) => {
   }
 
   function announceWinner() {
-    if (winnerDetails?.username) return;
-
     socket.emit("winner_xo", {
       roomId,
       username,
@@ -241,24 +277,16 @@ export const XOGameBoard: React.FC<Props> = ({ roomId, username }) => {
 
           <p>username: {winnerDetails.username}</p>
 
-          <Button
-            mt={5}
-            onClick={async () => {
-              socket.emit("leave_room", {
-                roomId,
-              });
-
-              setPlayerSymbol("");
-              setIsMyTurn(false);
-              setGameStatus(gameStatusEnum.WAIT);
-              setWinnerDetails(undefined);
-              setBoardTileInfo(boardTile);
-
-              socketInitializer();
-            }}
-          >
-            Reset
-          </Button>
+          {/* {gameStatus !== gameStatusEnum.LIVE && (
+            <Button
+              mt={5}
+              onClick={async () => {
+                
+              }}
+            >
+              Reset
+            </Button>
+          )} */}
         </div>
       )}
     </div>

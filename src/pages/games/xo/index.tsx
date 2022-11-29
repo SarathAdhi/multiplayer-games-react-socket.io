@@ -65,9 +65,9 @@ const XOGame = () => {
     <PageLayout className="items-center">
       {id ? (
         <div className="w-full h-full flex flex-col items-center">
-          <Heading size="xl" className="-mb-10">
+          {/* <Heading size="xl" >
             Tic Tac Toe
-          </Heading>
+          </Heading> */}
 
           {showUsernameComponent ? (
             <UsernameComponent
