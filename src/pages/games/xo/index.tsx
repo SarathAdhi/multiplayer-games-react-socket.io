@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Heading, Input } from "@chakra-ui/react";
 import { uuid } from "@utils/uuid";
 import Link from "next/link";
+import { CreateOrJoinRoom } from "@modules/games/XO/CreateOrJoinRoom";
 
 type UsernameCompProps = {
   username: string;
@@ -48,6 +49,7 @@ const XOGame = () => {
   const router = useRouter();
 
   const [username, setUsername] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const [showUsernameComponent, setShowUsernameComponent] = useState(true);
 
   const id = router.query.id as string;
@@ -59,38 +61,29 @@ const XOGame = () => {
       setUsername(_username);
       setShowUsernameComponent(false);
     }
+
+    setIsLoading(false);
   }, [id]);
+
+  if (isLoading) return <></>;
+
+  if (!id) return <CreateOrJoinRoom />;
 
   return (
     <PageLayout className="items-center">
-      {id ? (
-        <div className="w-full h-full flex flex-col items-center">
-          {/* <Heading size="xl" >
-            Tic Tac Toe
-          </Heading> */}
+      <div className="w-full h-full flex flex-col items-center">
+        <Heading size="xl">Tic Tac Toe</Heading>
 
-          {showUsernameComponent ? (
-            <UsernameComponent
-              username={username}
-              setUsername={setUsername}
-              setShowUsernameComponent={setShowUsernameComponent}
-            />
-          ) : (
-            <XOGameBoard roomId={id} username={username} />
-          )}
-        </div>
-      ) : (
-        <div className="h-full grid place-content-center place-items-center gap-4">
-          <Heading size="xl">Create a new room</Heading>
-
-          <Link
-            href={`?id=${uuid(6)}`}
-            className="bg-blue-600 px-3 py-1 rounded-md text-white font-medium tracking-wide"
-          >
-            Create
-          </Link>
-        </div>
-      )}
+        {showUsernameComponent ? (
+          <UsernameComponent
+            username={username}
+            setUsername={setUsername}
+            setShowUsernameComponent={setShowUsernameComponent}
+          />
+        ) : (
+          <XOGameBoard roomId={id} username={username} />
+        )}
+      </div>
     </PageLayout>
   );
 };

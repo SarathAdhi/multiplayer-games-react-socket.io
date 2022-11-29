@@ -1,20 +1,11 @@
 import React from "react";
-import { Button, Heading, IconButton, useToast } from "@chakra-ui/react";
+import { Button, IconButton, Image, useToast } from "@chakra-ui/react";
 import Link from "next/link";
 import { pages } from "./page";
 import { useRouter } from "next/router";
 import clsx from "clsx";
 import { FaShareAlt } from "react-icons/fa";
-import {
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  MenuItemOption,
-  MenuGroup,
-  MenuOptionGroup,
-  MenuDivider,
-} from "@chakra-ui/react";
+import { Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
 import { GiHamburgerMenu } from "react-icons/gi";
 
 const MobileNavbar = () => (
@@ -41,26 +32,24 @@ export const Navbar = () => {
   const toast = useToast();
 
   return (
-    <header className="w-full flex items-center justify-center bg-white shadow-md">
-      <div className="w-[1440px] max-w-full p-2 flex items-center justify-between">
+    <header className="z-50 sticky top-0 w-full flex items-center justify-center bg-[#030303] shadow-md">
+      <div className="w-full h-16 p-2 lg:px-4 flex items-center justify-between">
         <Link href="/">
-          <Heading size="lg" color="GrayText">
-            MG
-          </Heading>
+          <Image className="h-12" src="/assets/games/tic-tac-toe.png" />
         </Link>
 
         <div className="flex items-center gap-3">
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-5">
             {pages.map(({ name, href, Icon }) => (
               <Link
                 key={name}
                 href={href}
                 className={clsx(
-                  "px-3 py-2 rounded-full font-bold transition flex items-center gap-1",
-                  currentPath === href && "bg-gray-200"
+                  "rounded-full font-medium transition flex items-center gap-1 text-[#6f6f6f]",
+                  currentPath === href && "text-gray-200"
                 )}
               >
-                <Icon className="w-5 h-5" />
+                <Icon className="w-4 h-4" />
                 <span>{name}</span>
               </Link>
             ))}

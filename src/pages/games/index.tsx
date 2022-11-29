@@ -6,8 +6,12 @@ import { Card, CardBody, Stack, Text, Heading, Image } from "@chakra-ui/react";
 const ViewGames = () => {
   return (
     <PageLayout>
-      <div className="w-full grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-        <Card maxW="sm">
+      <div className="w-full flex flex-wrap justify-center gap-2">
+        <Card
+          maxW="sm"
+          bg="gray.400"
+          className="duration-200 hover:shadow-xl !shadow-gray-600"
+        >
           <CardBody>
             <Image
               borderRadius="lg"
@@ -15,17 +19,17 @@ const ViewGames = () => {
               alt="Green double couch with wooden legs"
             />
 
-            <Stack mt="6" spacing={{ base: "2", md: "3" }} align="start">
-              <Heading size="md">Tic Tac Toe</Heading>
+            <Stack mt="6">
+              <Heading size="lg">Tic Tac Toe</Heading>
 
-              <Text>
+              <Text fontWeight="medium">
                 {`Play the classic Tic-Tac-Toe game (also called Noughts and
                 Crosses) for free online with your friends.`}
               </Text>
 
               <Link
                 href="/games/xo"
-                className="bg-blue-600 text-white font-semibold px-4 py-2 rounded-md"
+                className="!mt-5 w-full text-center bg-blue-600 text-white font-semibold px-4 py-2 rounded-md"
               >
                 Play Tic-Tac-Toe
               </Link>

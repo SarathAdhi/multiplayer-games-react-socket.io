@@ -1,12 +1,7 @@
 import React, { useEffect, useState } from "react";
 import io from "socket.io-client";
 import { Tooltip, Button, useToast } from "@chakra-ui/react";
-
-const boardTile = ["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((e) => ({
-  tile: e,
-  username: "",
-  playerSymbol: "",
-}));
+import { boardTile, gameStatusEnum } from "@utils/constants/game";
 
 type Props = {
   roomId: string;
@@ -19,11 +14,10 @@ type BoardTileInfoProps = {
   username: string;
 };
 
-enum gameStatusEnum {
-  START = "START",
-  WAIT = "WAIT",
-  LIVE = "LIVE",
-}
+type SocketInitializerProps = {
+  _winnerDetails: BoardTileInfoProps | null;
+  currentPlayers: string[];
+};
 
 let socket: any;
 
@@ -48,119 +42,12 @@ export const XOGameBoard: React.FC<Props> = ({ roomId, username }) => {
     };
   }, []);
 
-  function resetTheGame(
-    _winnerDetails: BoardTileInfoProps,
-    currentPlayers: string[]
-  ) {
-    socket.emit("leave_room", {
-      roomId,
-      boardTile,
-    });
-
-    socketInitializer({ _winnerDetails, currentPlayers });
-  }
-
-  const socketInitializer = async ({
-    _winnerDetails,
-    currentPlayers,
-  }: {
-    _winnerDetails: BoardTileInfoProps | null;
-    currentPlayers: string[];
-  }) => {
-    setWinnerDetails(undefined);
-
-    await fetch("/api/xo");
-
-    socket = io();
-
-    socket.emit("join_xo_room", {
-      username,
-      roomId,
-      preWinner: _winnerDetails?.username,
-      isGameReset: !!_winnerDetails?.username,
-      currentPlayers,
-    });
-
-    socket.on(
-      "start_xo",
-      (
-        data: { count: number; gameStatus: gameStatusEnum } & BoardTileInfoProps
-      ) => {
-        setPlayerSymbol(data.playerSymbol);
-        setIsMyTurn(data.playerSymbol === "X" ? true : false);
-
-        setGameStatus(data.gameStatus);
-
-        // console.log({ status: data.gameStatus });
-      }
-    );
-
-    socket.on(
-      "waiting_lobby",
-      (data: { gameStatus: gameStatusEnum } & BoardTileInfoProps) => {
-        console.log({ status: data.gameStatus });
-        setGameStatus(data.gameStatus);
-      }
-    );
-
-    socket.on("reset_tile", (data: { boardTile: BoardTileInfoProps[] }) => {
-      setBoardTileInfo(data.boardTile);
-    });
-
-    socket.on("receive_message_xo", (data: BoardTileInfoProps) => {
-      setIsMyTurn(data.username === username ? false : true);
-
-      setBoardTileInfo((currentMsg) =>
-        currentMsg.map((e) => {
-          if (e.tile === data.tile) return data;
-          else return e;
-        })
-      );
-    });
-
-    socket.on(
-      "announce_winner",
-      (data: { currentPlayers: string[]; result: BoardTileInfoProps }) => {
-        setWinnerDetails(data.result);
-
-        toast.closeAll();
-
-        toast({
-          title: "Refreshing in 3 seconds",
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-        });
-
-        setTimeout(() => resetTheGame(data.result, data.currentPlayers), 3000);
-      }
-    );
-  };
-
-  function handleTileTouch(tile: string) {
-    console.log({ playerSymbol });
-
-    socket.emit("send_message_xo", {
-      roomId,
-      username,
-      tile,
-      playerSymbol,
-    });
-  }
-
-  function announceWinner() {
-    socket.emit("winner_xo", {
-      roomId,
-      username,
-      playerSymbol,
-    });
-  }
-
   useEffect(() => {
     const getBoardTileSymbol = boardTileInfo.map((e, index) => {
       if (e.playerSymbol === "") return `${index + 1}-random`;
       else return e.playerSymbol;
     });
+
     const diagonalL_R = [
       getBoardTileSymbol[0],
       getBoardTileSymbol[4],
@@ -208,7 +95,8 @@ export const XOGameBoard: React.FC<Props> = ({ roomId, username }) => {
       getBoardTileSymbol[5],
       getBoardTileSymbol[8],
     ].every((e) => e === playerSymbol);
-    if (
+
+    const isWinner =
       diagonalL_R ||
       diagonalR_L ||
       Horizontal_0 ||
@@ -216,10 +104,110 @@ export const XOGameBoard: React.FC<Props> = ({ roomId, username }) => {
       Horizontal_2 ||
       Virtical_0 ||
       Virtical_1 ||
-      Virtical_2
-    )
-      announceWinner();
+      Virtical_2;
+
+    if (isWinner) announceWinner();
   }, [boardTileInfo]);
+
+  function resetTheGame(
+    _winnerDetails: BoardTileInfoProps,
+    currentPlayers: string[]
+  ) {
+    socket.emit("leave_room", {
+      roomId,
+      boardTile,
+    });
+
+    socketInitializer({ _winnerDetails, currentPlayers });
+  }
+
+  async function socketInitializer({
+    _winnerDetails,
+    currentPlayers,
+  }: SocketInitializerProps) {
+    setWinnerDetails(undefined);
+
+    await fetch("/api/xo");
+
+    socket = io();
+
+    socket.emit("join_xo_room", {
+      username,
+      roomId,
+      preWinner: _winnerDetails?.username,
+      isGameReset: !!_winnerDetails?.username,
+      currentPlayers,
+    });
+
+    socket.on(
+      "start_xo",
+      (
+        data: { count: number; gameStatus: gameStatusEnum } & BoardTileInfoProps
+      ) => {
+        setPlayerSymbol(data.playerSymbol);
+        setIsMyTurn(data.playerSymbol === "X" ? true : false);
+        setGameStatus(data.gameStatus);
+      }
+    );
+
+    socket.on(
+      "waiting_lobby",
+      (data: { gameStatus: gameStatusEnum } & BoardTileInfoProps) => {
+        console.log({ status: data.gameStatus });
+        setGameStatus(data.gameStatus);
+      }
+    );
+
+    socket.on("reset_tile", (data: { boardTile: BoardTileInfoProps[] }) => {
+      setBoardTileInfo(data.boardTile);
+    });
+
+    socket.on("receive_message_xo", (data: BoardTileInfoProps) => {
+      setIsMyTurn(data.username === username ? false : true);
+
+      setBoardTileInfo((currentMsg) =>
+        currentMsg.map((e) => {
+          if (e.tile === data.tile) return data;
+          else return e;
+        })
+      );
+    });
+
+    socket.on(
+      "announce_winner",
+      (data: { currentPlayers: string[]; result: BoardTileInfoProps }) => {
+        setWinnerDetails(data.result);
+
+        toast.closeAll();
+
+        toast({
+          title: "Refreshing in 3 seconds",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+
+        setTimeout(() => resetTheGame(data.result, data.currentPlayers), 3000);
+      }
+    );
+  }
+
+  function handleTileTouch(tile: string) {
+    socket.emit("send_message_xo", {
+      roomId,
+      username,
+      tile,
+      playerSymbol,
+    });
+  }
+
+  function announceWinner() {
+    socket.emit("winner_xo", {
+      roomId,
+      username,
+      playerSymbol,
+    });
+  }
 
   return (
     <div className="w-full flex-1 flex flex-col items-center justify-center gap-5">
@@ -276,17 +264,6 @@ export const XOGameBoard: React.FC<Props> = ({ roomId, username }) => {
           </h1>
 
           <p>username: {winnerDetails.username}</p>
-
-          {/* {gameStatus !== gameStatusEnum.LIVE && (
-            <Button
-              mt={5}
-              onClick={async () => {
-                
-              }}
-            >
-              Reset
-            </Button>
-          )} */}
         </div>
       )}
     </div>
