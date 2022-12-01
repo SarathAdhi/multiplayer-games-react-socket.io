@@ -43,7 +43,7 @@ let timerClone: any;
 
 const timePerRound = 10;
 
-export const ScribleGameBoard: React.FC<Props> = ({
+export const SkribblGameBoard: React.FC<Props> = ({
   username,
   isAdmin,
   roomId,
@@ -111,11 +111,11 @@ export const ScribleGameBoard: React.FC<Props> = ({
   }, [wordToFind]);
 
   async function socketInitializer() {
-    await fetch("/api/scribbl");
+    await fetch("/api/skribbl");
 
     socket = io();
 
-    socket.emit("join_scribbl_room", {
+    socket.emit("join_skribbl_room", {
       player: myDetails,
       roomId,
       currentPlayers: [],
@@ -136,7 +136,7 @@ export const ScribleGameBoard: React.FC<Props> = ({
       setMyDetails((pre) => ({ ...pre, isAdmin: true }));
     });
 
-    socket.on("start_scribbl_init", (data: { playerTurn: string }) => {
+    socket.on("start_skribbl_init", (data: { playerTurn: string }) => {
       setStartGame(true);
       setIsMyTurn(data.playerTurn === myDetails.playerId);
 
@@ -182,7 +182,7 @@ export const ScribleGameBoard: React.FC<Props> = ({
   async function handleDraw() {
     const png = await (ref?.current as any)?.exportImage("png");
 
-    socket?.emit("send_message_scribbl", {
+    socket?.emit("send_message_skribbl", {
       ...myDetails,
       roomId,
       png,
@@ -197,7 +197,7 @@ export const ScribleGameBoard: React.FC<Props> = ({
 
     if (!message) return;
 
-    socket?.emit("send_message_scribbl", {
+    socket?.emit("send_message_skribbl", {
       ...myDetails,
       roomId,
       message,
@@ -292,7 +292,7 @@ export const ScribleGameBoard: React.FC<Props> = ({
             position="fixed"
             className="!fixed !left-1/2 !-translate-x-1/2"
             onClick={() => {
-              socket.emit("start_scribbl", { roomId });
+              socket.emit("start_skribbl", { roomId });
 
               setStartGame(true);
             }}
@@ -323,7 +323,7 @@ export const ScribleGameBoard: React.FC<Props> = ({
               onClick={() => {
                 setWordToFind(word);
 
-                socket?.emit("send_message_scribbl", {
+                socket?.emit("send_message_skribbl", {
                   ...myDetails,
                   roomId,
                   action: "word",

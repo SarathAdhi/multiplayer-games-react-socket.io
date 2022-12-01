@@ -1,4 +1,4 @@
-import { Players } from "@modules/games/Scribbl";
+import { Players } from "@modules/games/Skribbl";
 import { NextApiRequest } from "next";
 import { Server } from "socket.io";
 
@@ -15,7 +15,7 @@ export default function SocketHandler(req: NextApiRequest, res: any) {
   res.socket.server.io = io;
 
   io.on("connection", (socket) => {
-    socket.on("join_scribbl_room", (obj) => {
+    socket.on("join_skribbl_room", (obj) => {
       console.log("Joined room");
 
       let count = io.sockets.adapter.rooms.get(obj.roomId)?.size!;
@@ -50,8 +50,8 @@ export default function SocketHandler(req: NextApiRequest, res: any) {
       io.to(obj.roomId).emit("player_joined", { currentPlayers });
     });
 
-    socket.on("start_scribbl", (obj) => {
-      io.to(obj.roomId).emit("start_scribbl_init", {
+    socket.on("start_skribbl", (obj) => {
+      io.to(obj.roomId).emit("start_skribbl_init", {
         currentPlayers,
         playerTurn: currentPlayers[0].playerId,
       });
@@ -71,7 +71,7 @@ export default function SocketHandler(req: NextApiRequest, res: any) {
       });
     });
 
-    socket.on("send_message_scribbl", (obj) => {
+    socket.on("send_message_skribbl", (obj) => {
       if (obj.action === "chat")
         io.in(obj.roomId).emit("receive_chat_message", obj);
       //
@@ -85,7 +85,7 @@ export default function SocketHandler(req: NextApiRequest, res: any) {
       }
     });
 
-    socket.on("winner_scribbl", (obj) => {
+    socket.on("winner_skribbl", (obj) => {
       const result = {
         result: obj,
         currentPlayers,
