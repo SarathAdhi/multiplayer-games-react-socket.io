@@ -10,7 +10,7 @@ import {
 import { PageLayout } from "@layouts/PageLayout";
 import { uuid } from "@utils/uuid";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardBody } from "@chakra-ui/react";
 import {
   Popover,
@@ -23,9 +23,23 @@ import {
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 
-export const CreateOrJoinRoom = () => {
-  const [roomId, setRoomId] = useState("");
+type Props = {
+  setIsAdmin?: (isAdmin: boolean) => void;
+};
+
+export const CreateOrJoinRoom: React.FC<Props> = ({ setIsAdmin }) => {
   const router = useRouter();
+
+  const [roomId, setRoomId] = useState("");
+  const [username, setUsername] = useState("");
+
+  useEffect(() => {
+    const _username = localStorage.getItem("username");
+
+    if (_username) {
+      setUsername(_username);
+    }
+  }, []);
 
   return (
     <PageLayout className="flex-1 justify-center">
@@ -49,12 +63,45 @@ export const CreateOrJoinRoom = () => {
                 ID with your friends.
               </Text>
 
-              <Link
-                href={`?id=${uuid(6)}`}
-                className="w-full text-center bg-blue-600 p-2 rounded-md text-white font-medium tracking-wide"
-              >
-                Create
-              </Link>
+              <Popover>
+                <PopoverTrigger>
+                  <Button className="!bg-blue-600 text-white font-medium tracking-wide">
+                    Create
+                  </Button>
+                </PopoverTrigger>
+
+                <PopoverContent>
+                  <PopoverArrow />
+                  <PopoverCloseButton />
+                  <PopoverHeader fontWeight="bold" color="black">
+                    Enter a Username
+                  </PopoverHeader>
+                  <PopoverBody>
+                    <Flex gap={2}>
+                      <Input
+                        className="!w-full !border !border-gray-500 text-black"
+                        placeholder="Enter your username"
+                        value={username}
+                        onChange={(e) => {
+                          setUsername(e.target.value);
+                          localStorage.setItem("username", e.target.value);
+                        }}
+                        onKeyUp={() => {
+                          router.replace(`?id=${roomId}`);
+                        }}
+                      />
+
+                      <Link
+                        onClick={() => setIsAdmin?.(true)}
+                        href={`?id=${uuid(6)}`}
+                        className="text-center bg-blue-600 p-2 px-4 rounded-md text-white font-medium tracking-wide"
+                      >
+                        Create
+                      </Link>
+                    </Flex>
+                  </PopoverBody>
+                </PopoverContent>
+              </Popover>
             </Stack>
           </CardBody>
         </Card>
@@ -88,13 +135,13 @@ export const CreateOrJoinRoom = () => {
                 <PopoverContent>
                   <PopoverArrow />
                   <PopoverCloseButton />
-                  <PopoverHeader fontWeight="bold">
+                  <PopoverHeader fontWeight="bold" color="black">
                     Enter your Room ID
                   </PopoverHeader>
                   <PopoverBody>
                     <Flex gap={2}>
                       <Input
-                        className="!w-full !border !border-gray-500 !bg-white"
+                        className="!w-full !border !border-gray-500 text-black"
                         placeholder="uDA1A0"
                         value={roomId}
                         onChange={(e) => setRoomId(e.target.value)}

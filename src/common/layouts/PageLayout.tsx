@@ -16,7 +16,7 @@ export const PageLayout: React.FC<Component> = ({ className, children }) => {
 
         <section
           className={clsx(
-            "w-full max-w-[1440px] mt-10 p-2 flex flex-col text-[#6f6f6f]",
+            "w-full max-w-[1440px] mt-5 p-2 flex flex-col text-[#6f6f6f]",
             className
           )}
         >

@@ -153,7 +153,6 @@ export const XOGameBoard: React.FC<Props> = ({ roomId, username }) => {
     socket.on(
       "waiting_lobby",
       (data: { gameStatus: gameStatusEnum } & BoardTileInfoProps) => {
-        console.log({ status: data.gameStatus });
         setGameStatus(data.gameStatus);
       }
     );

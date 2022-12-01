@@ -31,8 +31,15 @@ export const Navbar = () => {
   const currentPath = router.asPath;
   const toast = useToast();
 
+  const isGamesPage = currentPath.includes("/games/");
+
   return (
-    <header className="z-50 sticky top-0 w-full flex items-center justify-center bg-[#030303] shadow-md">
+    <header
+      className={clsx(
+        "z-50 w-full flex items-center justify-center bg-[#030303] shadow-md",
+        !isGamesPage && "sticky top-0"
+      )}
+    >
       <div className="w-full h-16 p-2 lg:px-4 flex items-center justify-between">
         <Link href="/">
           <Image className="h-12" src="/assets/games/tic-tac-toe.png" />
