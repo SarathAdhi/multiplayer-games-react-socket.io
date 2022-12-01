@@ -42,10 +42,10 @@ export const CreateOrJoinRoom: React.FC<Props> = ({ setIsAdmin }) => {
   }, []);
 
   return (
-    <PageLayout className="flex-1 justify-center">
+    <PageLayout title="Create | Join" className="flex-1 justify-center">
       <div className="grid md:grid-cols-2 gap-5">
         <Card bg="gray.700" color="white">
-          <CardBody>
+          <CardBody className="flex flex-col justify-between">
             <Image
               w="full"
               h={{ base: "60", md: "80" }}
@@ -107,7 +107,7 @@ export const CreateOrJoinRoom: React.FC<Props> = ({ setIsAdmin }) => {
         </Card>
 
         <Card bg="gray.700" color="white">
-          <CardBody>
+          <CardBody className="flex flex-col justify-between">
             <Image
               w="full"
               h={{ base: "60", md: "80" }}

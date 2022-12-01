@@ -26,7 +26,7 @@ const XOGame = () => {
   if (!id) return <CreateOrJoinRoom />;
 
   return (
-    <PageLayout className="items-center">
+    <PageLayout title="Games | Tic Tac Toe" className="items-center">
       <div className="w-full h-full flex flex-col items-center">
         <Heading size="xl">Tic Tac Toe</Heading>
 

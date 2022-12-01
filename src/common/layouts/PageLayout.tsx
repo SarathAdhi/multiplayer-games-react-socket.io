@@ -4,11 +4,15 @@ import Head from "next/head";
 import React from "react";
 import { Component } from "types/page";
 
-export const PageLayout: React.FC<Component> = ({ className, children }) => {
+export const PageLayout: React.FC<Component & { title?: string }> = ({
+  title,
+  className,
+  children,
+}) => {
   return (
     <>
       <Head>
-        <title>Next.js + TypeScript Example</title>
+        <title>{title || "Multiplayer Online Games"}</title>
       </Head>
 
       <main className="flex flex-col items-center h-screen bg-[#030303] overflow-auto">

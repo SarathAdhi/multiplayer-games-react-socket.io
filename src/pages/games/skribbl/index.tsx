@@ -27,7 +27,7 @@ const SkribblGame = () => {
   if (!id) return <CreateOrJoinRoom setIsAdmin={setIsAdmin} />;
 
   return (
-    <PageLayout>
+    <PageLayout title="Games | Skribbl">
       <SkribblGameBoard roomId={id} username={username} isAdmin={isAdmin} />
     </PageLayout>
   );
