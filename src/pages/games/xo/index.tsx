@@ -2,7 +2,7 @@ import { PageLayout } from "@layouts/PageLayout";
 import { XOGameBoard } from "@modules/games/XO/indexXO";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import { Button, Heading, Input } from "@chakra-ui/react";
+import { Heading } from "@chakra-ui/react";
 import { CreateOrJoinRoom } from "@components/CreateOrJoinRoom";
 
 const XOGame = () => {

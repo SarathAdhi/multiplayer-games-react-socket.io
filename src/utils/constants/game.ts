@@ -10,7 +10,7 @@ export const allGames = [
       "Play the classic Tic-Tac-Toe game (also called Noughts and Crosses) for free online with your friends.",
   },
   {
-    img: "https://cdn.pixabay.com/photo/2013/07/12/15/56/tic-tac-toe-150614_960_720.png",
+    img: "https://images.vediagames.com/file/vg-images/games/skribbl-io/thumb512x512.jpg",
     name: "Skribbl",
     linkText: "Play Skribbl",
     href: "/games/skribbl",
