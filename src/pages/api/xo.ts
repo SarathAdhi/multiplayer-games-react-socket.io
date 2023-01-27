@@ -1,9 +1,16 @@
 import { NextApiRequest } from "next";
 import { Server } from "socket.io";
+import NextCors from "nextjs-cors";
 
 let currentPlayers: string[] = [];
 
-export default function SocketHandler(req: NextApiRequest, res: any) {
+export default async function SocketHandler(req: NextApiRequest, res: any) {
+  await NextCors(req, res, {
+    methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
+    origin: "*",
+    optionsSuccessStatus: 200,
+  });
+
   if (res.socket.server.io) {
     console.log("Already set up");
     res.end();
