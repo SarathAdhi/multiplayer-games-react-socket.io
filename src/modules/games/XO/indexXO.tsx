@@ -127,68 +127,74 @@ export const XOGameBoard: React.FC<Props> = ({ roomId, username }) => {
   }: SocketInitializerProps) {
     setWinnerDetails(undefined);
 
-    await fetch("/api/xo");
+    await fetch("/api/xo").finally(() => {
+      socket = io();
 
-    socket = io();
+      socket.emit("join_xo_room", {
+        username,
+        roomId,
+        preWinner: _winnerDetails?.username,
+        isGameReset: !!_winnerDetails?.username,
+        currentPlayers,
+      });
 
-    socket.emit("join_xo_room", {
-      username,
-      roomId,
-      preWinner: _winnerDetails?.username,
-      isGameReset: !!_winnerDetails?.username,
-      currentPlayers,
-    });
+      socket.on(
+        "start_xo",
+        (
+          data: {
+            count: number;
+            gameStatus: gameStatusEnum;
+          } & BoardTileInfoProps
+        ) => {
+          setPlayerSymbol(data.playerSymbol);
+          setIsMyTurn(data.playerSymbol === "X" ? true : false);
+          setGameStatus(data.gameStatus);
+        }
+      );
 
-    socket.on(
-      "start_xo",
-      (
-        data: { count: number; gameStatus: gameStatusEnum } & BoardTileInfoProps
-      ) => {
-        setPlayerSymbol(data.playerSymbol);
-        setIsMyTurn(data.playerSymbol === "X" ? true : false);
-        setGameStatus(data.gameStatus);
-      }
-    );
+      socket.on(
+        "waiting_lobby",
+        (data: { gameStatus: gameStatusEnum } & BoardTileInfoProps) => {
+          setGameStatus(data.gameStatus);
+        }
+      );
 
-    socket.on(
-      "waiting_lobby",
-      (data: { gameStatus: gameStatusEnum } & BoardTileInfoProps) => {
-        setGameStatus(data.gameStatus);
-      }
-    );
+      socket.on("reset_tile", (data: { boardTile: BoardTileInfoProps[] }) => {
+        setBoardTileInfo(data.boardTile);
+      });
 
-    socket.on("reset_tile", (data: { boardTile: BoardTileInfoProps[] }) => {
-      setBoardTileInfo(data.boardTile);
-    });
+      socket.on("receive_message_xo", (data: BoardTileInfoProps) => {
+        setIsMyTurn(data.username === username ? false : true);
 
-    socket.on("receive_message_xo", (data: BoardTileInfoProps) => {
-      setIsMyTurn(data.username === username ? false : true);
+        setBoardTileInfo((currentMsg) =>
+          currentMsg.map((e) => {
+            if (e.tile === data.tile) return data;
+            else return e;
+          })
+        );
+      });
 
-      setBoardTileInfo((currentMsg) =>
-        currentMsg.map((e) => {
-          if (e.tile === data.tile) return data;
-          else return e;
-        })
+      socket.on(
+        "announce_winner",
+        (data: { currentPlayers: string[]; result: BoardTileInfoProps }) => {
+          setWinnerDetails(data.result);
+
+          toast.closeAll();
+
+          toast({
+            title: "Refreshing in 3 seconds",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+          });
+
+          setTimeout(
+            () => resetTheGame(data.result, data.currentPlayers),
+            3000
+          );
+        }
       );
     });
-
-    socket.on(
-      "announce_winner",
-      (data: { currentPlayers: string[]; result: BoardTileInfoProps }) => {
-        setWinnerDetails(data.result);
-
-        toast.closeAll();
-
-        toast({
-          title: "Refreshing in 3 seconds",
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-        });
-
-        setTimeout(() => resetTheGame(data.result, data.currentPlayers), 3000);
-      }
-    );
   }
 
   function handleTileTouch(tile: string) {

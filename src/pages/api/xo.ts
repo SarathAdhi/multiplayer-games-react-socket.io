@@ -77,3 +77,9 @@ export default function SocketHandler(req: NextApiRequest, res: any) {
   console.log("Setting up socket");
   res.end();
 }
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
