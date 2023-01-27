@@ -210,7 +210,7 @@ export const SkribblGameBoard: React.FC<Props> = ({
 
   return (
     <>
-      <div className="w-full flex flex-col gap-5">
+      <div className="w-full flex flex-col items-center gap-5">
         {startGame && <Heading>{remainingTime}</Heading>}
 
         <div className="w-full grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
@@ -289,8 +289,7 @@ export const SkribblGameBoard: React.FC<Props> = ({
 
         {myDetails.isAdmin && !startGame && currentPlayers.length > 1 ? (
           <Button
-            position="fixed"
-            className="!fixed !left-1/2 !-translate-x-1/2"
+            className=""
             onClick={() => {
               socket.emit("start_skribbl", { roomId });
 
