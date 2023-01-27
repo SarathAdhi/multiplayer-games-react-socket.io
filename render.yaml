@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: multiplayer-games-sa
+    env: node
+    plan: starter
+    buildCommand: yarn; yarn build
+    startCommand: yarn start
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
