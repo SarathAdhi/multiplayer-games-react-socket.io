@@ -1,23 +1,22 @@
 import { NextApiRequest } from "next";
 import { Server } from "socket.io";
-import NextCors from "nextjs-cors";
 
 let currentPlayers: string[] = [];
 
 export default async function SocketHandler(req: NextApiRequest, res: any) {
-  await NextCors(req, res, {
-    methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
-    origin: "*",
-    optionsSuccessStatus: 200,
-  });
-
   if (res.socket.server.io) {
     console.log("Already set up");
     res.end();
     return;
   }
 
-  const io = new Server(res.socket.server);
+  const io = new Server(res.socket.server, {
+    allowEIO3: true,
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+    },
+  });
 
   io.on("connection", (socket) => {
     socket.on("join_xo_room", (obj) => {
