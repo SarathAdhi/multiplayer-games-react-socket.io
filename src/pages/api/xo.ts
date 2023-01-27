@@ -12,10 +12,6 @@ export default async function SocketHandler(req: NextApiRequest, res: any) {
 
   const io = new Server(res.socket.server, {
     allowEIO3: true,
-    cors: {
-      origin: "*",
-      methods: ["GET", "POST"],
-    },
   });
 
   io.on("connection", (socket) => {
