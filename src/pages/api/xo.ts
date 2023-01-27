@@ -37,7 +37,7 @@ export default function SocketHandler(req: NextApiRequest, res: any) {
         gameStatus: obj.isGameReset ? previousGame : newGame,
       };
 
-      if (currentPlayers.length < 2) {
+      if (currentPlayers.length <= 2) {
         currentPlayers.push(obj.username);
       }
 
