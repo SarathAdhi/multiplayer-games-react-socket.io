@@ -11,7 +11,6 @@ export default function SocketHandler(req: NextApiRequest, res: any) {
   }
 
   const io = new Server(res.socket.server);
-  res.socket.server.io = io;
 
   io.on("connection", (socket) => {
     socket.on("join_xo_room", (obj) => {
@@ -73,6 +72,8 @@ export default function SocketHandler(req: NextApiRequest, res: any) {
       io.to(socket.id).emit("reset_tile", obj);
     });
   });
+
+  res.socket.server.io = io;
 
   console.log("Setting up socket");
   res.end();

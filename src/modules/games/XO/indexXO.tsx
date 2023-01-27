@@ -127,7 +127,7 @@ export const XOGameBoard: React.FC<Props> = ({ roomId, username }) => {
   }: SocketInitializerProps) {
     setWinnerDetails(undefined);
 
-    await fetch("/api/xo").finally(() => {
+    fetch("/api/xo").finally(() => {
       socket = io();
 
       socket.emit("join_xo_room", {
